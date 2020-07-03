@@ -1,6 +1,7 @@
 {
     "name": "upload",
     "version": "1.0.0",
+    "author": "Keefer",
     "description": "upload-demo",
     "private": true,
     "scripts": {
