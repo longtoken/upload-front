@@ -18,7 +18,6 @@ export interface Chunk {
     chunk: Blob;
     fileHash: string;
     md5AndFileNo: string;
-    fileNo: number;
     percentage: number;
 }
 
@@ -44,7 +43,6 @@ class App extends Component<AppProps, AppState> {
         } else {
             this.chunkListInfo = this.fileChunkList.map(({ file }, index) => ({
                 fileHash: this.fileMd5Value,
-                fileNo: index,
                 md5AndFileNo: `${this.fileMd5Value}-${index}`,
                 chunk: file,
                 percentage: 0,
@@ -64,7 +62,7 @@ class App extends Component<AppProps, AppState> {
         }
     }
     handlePause() {
-        axiosList.forEach((item) => item.cancel('abort'));
+        axiosList.forEach(item => item.cancel('abort'));
         axiosList.length = 0;
         message.error('上传暂停');
     }

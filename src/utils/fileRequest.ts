@@ -3,6 +3,7 @@ import { checkChunk, uploadChunk, mergeChunk } from 'utils/requestPath';
 import { Chunk } from '../App';
 import { Component } from 'react';
 import { axiosList } from 'utils/common';
+import { message } from 'antd';
 
 const CancelToken = Axios.CancelToken;
 
@@ -25,6 +26,7 @@ export function checkFileMD5(fileName: string, fileMd5Val: string): Promise<File
             })
             .catch(function (error) {
                 console.log(error, '--catch--');
+                message.error('网络连接失败');
                 reject({ message: '错误' });
             });
     });
@@ -38,13 +40,13 @@ export async function uploadChunks(
 ) {
     const requestList = chunkListInfo
         .filter(({ md5AndFileNo }) => !uploadedList.includes(md5AndFileNo))
-        .map(({ chunk, md5AndFileNo, fileNo, fileHash }) => {
+        .map(({ chunk, md5AndFileNo, fileHash }) => {
             const formData = new FormData();
             formData.append('chunk', chunk);
             formData.append('md5AndFileNo', md5AndFileNo);
             formData.append('fileName', fileName);
             formData.append('fileHash', fileHash);
-            return { formData, fileNo };
+            return formData;
         });
     if (requestList.length === 0) {
         mergeRequest(chunkListInfo[0].fileHash, fileName);
@@ -60,7 +62,7 @@ export async function uploadChunks(
 }
 
 function sendRequest(
-    requestList: { formData: FormData; fileNo: number }[],
+    requestList: FormData[],
     setUploadProgress: (percent: number) => void,
     upMaxCount: number = 4,
 ) {
@@ -70,7 +72,7 @@ function sendRequest(
         let uploadedCount = 0;
         const sendPacks = () => {
             while (sendCout < uploadedTotal && upMaxCount > 0) {
-                const formData = requestList[sendCout].formData;
+                const formData = requestList[sendCout];
                 upMaxCount--;
                 sendCout++;
 
