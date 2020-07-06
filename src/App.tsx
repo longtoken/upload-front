@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { Button, Progress, message } from 'antd';
 import { axiosList } from 'utils/common';
-import { getFileMd5, createFileChunk } from 'utils/fileProperty';
-import { checkFileMD5, uploadChunks } from 'utils/fileRequest';
+import { getFileMd5, createFileChunk, FileBlob } from 'utils/fileProperty';
+import { getFileChunks, uploadChunks } from 'utils/fileRequest';
 import './App.scss';
 import 'antd/dist/antd.less';
 
@@ -33,7 +33,7 @@ class App extends Component<AppProps, AppState> {
     chunkListInfo: Chunk[] = [];
     fileName: string = '';
     fileMd5Value: string = '';
-    fileChunkList: { file: Blob }[] = [];
+    fileChunkList: FileBlob[] = [];
     getFileMd5 = getFileMd5;
     uploadChunks = uploadChunks;
     handleUploaded(fileExist: boolean): boolean {
@@ -62,15 +62,17 @@ class App extends Component<AppProps, AppState> {
         }
     }
     handlePause() {
-        axiosList.forEach(item => item.cancel('abort'));
-        axiosList.length = 0;
-        message.error('上传暂停');
+        if (axiosList.length !== 0) {
+            axiosList.forEach((item) => item.cancel('abort'));
+            axiosList.length = 0;
+            message.error('上传暂停');
+        }
     }
     handleReuse() {
         this.startUpload();
     }
     async startUpload() {
-        let uploadedFileInfo = await checkFileMD5(this.fileName, this.fileMd5Value); // 获取上传文件信息
+        let uploadedFileInfo = await getFileChunks(this.fileName, this.fileMd5Value); // 获取上传文件信息
         if (this.handleUploaded(uploadedFileInfo.fileExist) && uploadedFileInfo.chunkList) {
             this.uploadChunks(this.chunkListInfo, uploadedFileInfo.chunkList, this.fileName);
         }

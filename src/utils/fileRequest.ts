@@ -1,5 +1,5 @@
 import Axios, { CancelTokenSource } from 'axios';
-import { checkChunk, uploadChunk, mergeChunk } from 'utils/requestPath';
+import { checkChunkPath, uploadChunkPath, mergeChunkPath } from 'utils/requestPath';
 import { Chunk } from '../App';
 import { Component } from 'react';
 import { axiosList } from 'utils/common';
@@ -13,9 +13,9 @@ interface FileStatus {
     desc: string;
 }
 
-export function checkFileMD5(fileName: string, fileMd5Val: string): Promise<FileStatus> {
+export function getFileChunks(fileName: string, fileMd5Val: string): Promise<FileStatus> {
     return new Promise((resolve, reject) => {
-        Axios.get(checkChunk, {
+        Axios.get(checkChunkPath, {
             params: {
                 fileName,
                 fileMd5Val,
@@ -78,7 +78,7 @@ function sendRequest(
 
                 const source = CancelToken.source();
 
-                Axios.post(uploadChunk, formData, {
+                Axios.post(uploadChunkPath, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                     cancelToken: source.token,
                 }).then(() => {
@@ -111,7 +111,7 @@ function rmUploadedRequest(source: CancelTokenSource) {
 }
 
 export function mergeRequest(targetFile: string, fileName: string) {
-    Axios.get(mergeChunk, {
+    Axios.get(mergeChunkPath, {
         params: {
             fileHash: targetFile,
             fileName,

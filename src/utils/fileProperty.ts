@@ -2,13 +2,17 @@ import SparkMD5 from 'spark-md5';
 import { Component } from 'react';
 import { CHUNK_SIZE } from './common';
 
-export function getFileMd5(this: Component, fileChunkList: { file: Blob }[]): Promise<string> {
+export interface FileBlob {
+    file: Blob;
+}
+
+export function getFileMd5(this: Component, fileChunkList: FileBlob[]): Promise<string> {
     return new Promise((resolve, reject) => {
         let count = 0;
         let totalCount = fileChunkList.length;
         let spark = new SparkMD5.ArrayBuffer();
         let fileReader = new FileReader();
-        fileReader.onload = (e) => {
+        fileReader.onload = e => {
             let percent = Math.round((count / totalCount) * 100);
             this.setState({ scanPercent: percent });
             if (e.target && e.target.result) {
@@ -32,12 +36,12 @@ export function getFileMd5(this: Component, fileChunkList: { file: Blob }[]): Pr
     });
 }
 
-export function createFileChunk(file: File) {
-    const fileChunkList = [];
-    let part = 0;
-    while (part < file.size) {
-        fileChunkList.push({ file: file.slice(part, part + CHUNK_SIZE) });
-        part += CHUNK_SIZE;
+export function createFileChunk(file: File): FileBlob[] {
+    const fileChunkList: FileBlob[] = [];
+    let start = 0;
+    while (start < file.size) {
+        fileChunkList.push({ file: file.slice(start, start + CHUNK_SIZE) });
+        start += CHUNK_SIZE;
     }
     return fileChunkList;
 }
